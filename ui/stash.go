@@ -872,19 +872,25 @@ func filterMarkdowns(m stashModel) tea.Cmd {
 		}
 
 		mds := m.markdowns
-		filtered := []*markdown{}
 
-		if m.filterInput.Value() == "/t" {
+		if m.filterInput.Value() == "/old" {
 			sort.Slice(mds, func(i, j int) bool {
 				return mds[i].Modtime.Before(mds[j].Modtime)
 			})
 
-			for _, item := range mds {
-				log.Debug(item.Note, "-", item.Modtime)
-			}
+			return filteredMarkdownMsg(mds)
+		}
+
+		if m.filterInput.Value() == "/new" {
+			sort.Slice(mds, func(i, j int) bool {
+				return mds[i].Modtime.After(mds[j].Modtime)
+			})
+
+			return filteredMarkdownMsg(mds)
 		}
 
 		targets := []string{}
+		filtered := []*markdown{}
 
 		for _, t := range mds {
 			targets = append(targets, t.filterValue)
