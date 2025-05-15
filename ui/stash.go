@@ -871,8 +871,20 @@ func filterMarkdowns(m stashModel) tea.Cmd {
 			return filteredMarkdownMsg(m.markdowns) // return everything
 		}
 
-		targets := []string{}
 		mds := m.markdowns
+		filtered := []*markdown{}
+
+		if m.filterInput.Value() == "/t" {
+			sort.Slice(mds, func(i, j int) bool {
+				return mds[i].Modtime.Before(mds[j].Modtime)
+			})
+
+			for _, item := range mds {
+				log.Debug(item.Note, "-", item.Modtime)
+			}
+		}
+
+		targets := []string{}
 
 		for _, t := range mds {
 			targets = append(targets, t.filterValue)
@@ -881,7 +893,6 @@ func filterMarkdowns(m stashModel) tea.Cmd {
 		ranks := fuzzy.Find(m.filterInput.Value(), targets)
 		sort.Stable(ranks)
 
-		filtered := []*markdown{}
 		for _, r := range ranks {
 			filtered = append(filtered, mds[r.Index])
 		}
